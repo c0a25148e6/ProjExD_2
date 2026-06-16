@@ -110,10 +110,10 @@ def calc_orientation(org: pg.Rect, dst: pg.Rect, current_xy: tuple[float, float]
         
     # ノルムが√50になるように正規化する
     target_norm = math.sqrt(50)
-    vx = (dx / norm) * target_norm
-    vy = (dy / norm) * target_norm
+    base_vx = (dx / norm) * target_norm
+    base_vy = (dy / norm) * target_norm
     
-    return vx, vy
+    return base_vx, base_vy
 
 
 
@@ -132,7 +132,7 @@ def main():
     bb_rct = bb_img.get_rect() # 画像Surfaceに対応する画像Rectを取得
     bb_rct.centerx = random.randint(0,WIDTH) # 位置を表す変数に乱数を設定
     bb_rct.centery = random.randint(0,HEIGHT)
-    vx, vy = +5, +5 # 横方向速度
+    base_vx, base_vy = +5, +5 # 横方向速度
     
     clock = pg.time.Clock()
     tmr = 0
@@ -178,10 +178,10 @@ def main():
         kk_img = kk_imgs[tuple(sum_mv)]
         screen.blit(kk_img, kk_rct)
         
-        vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy))
+        base_vx, base_vy = calc_orientation(bb_rct, kk_rct, (base_vx, base_vy))
         # 演習2
-        avx = vx * bb_accs[min(tmr // 500, 9)] # 現在の加速度を反映した速度
-        avy = vy * bb_accs[min(tmr // 500, 9)]
+        abase_vx = base_vx * bb_accs[min(tmr // 500, 9)] # 現在の加速度を反映した速度
+        abase_vy = base_vy * bb_accs[min(tmr // 500, 9)]
         bb_img = bb_imgs[min(tmr // 500, 9)]
         
         
@@ -189,14 +189,14 @@ def main():
         bb_rct.width = bb_img.get_rect().width
         bb_rct.height = bb_img.get_rect().height
         
-        bb_rct.move_ip(avx, avy) # vx, vy の代わりに avx, avy を使う
+        bb_rct.move_ip(abase_vx, abase_vy) # base_vx, base_vy の代わりに abase_vx, abase_vy を使う
         
         # 爆弾の画面外判定
         yoko, tate = check_bound(bb_rct)
         if not yoko: # 横方向にはみ出たら
-            vx *= -1 
+            base_vx *= -1 
         if not tate: # 縦方向にはみ出たら
-            vy *= -1
+            base_vy *= -1
         
         screen.blit(bb_img, bb_rct)
         
