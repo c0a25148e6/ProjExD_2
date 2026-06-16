@@ -72,7 +72,29 @@ def init_bb_imgs() -> tuple[list[pg.Surface],list[int]]:
         
     return bb_imgs, bb_accs
     
-    
+
+
+def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
+    """
+    移動量タプルと対応する画像Surfaceの辞書を返す
+    """
+    img0 = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    img_flip = pg.transform.flip(img0, True, False) # 左右反転
+
+    kk_dict = {
+        (0, 0): img0,
+        (+5, 0): img_flip,
+        (+5, -5): pg.transform.rotozoom(img_flip, 45, 1.0),
+        (0, -5): pg.transform.rotozoom(img_flip, 90, 1.0),
+        (-5, -5): pg.transform.rotozoom(img0, -45, 1.0),
+        (-5, 0): img0,
+        (-5, +5): pg.transform.rotozoom(img0, 45, 1.0),
+        (0, +5): pg.transform.rotozoom(img_flip, -90, 1.0),
+        (+5, +5): pg.transform.rotozoom(img_flip, -45, 1.0),
+    }
+    return kk_dict
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -97,6 +119,10 @@ def main():
     bb_imgs, bb_accs = init_bb_imgs()
     bb_img = bb_imgs[0] # 初期画像を設定
     
+    #演習3
+    kk_imgs = get_kk_imgs()
+    kk_img = kk_imgs[(0, 0)] # 初期画像
+    
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -112,6 +138,8 @@ def main():
             if key_lst[key]:
                 sum_mv[0] += mv[0] # 横方向の移動量
                 sum_mv[1] += mv[1] # 縦方向の移動量
+        kk_img = kk_imgs[tuple(sum_mv)] # 移動量のタプルをキーにして画像を取得
+        screen.blit(kk_img, kk_rct)
                 
         # if key_lst[pg.K_UP]:
         #     sum_mv[1] -= 5
