@@ -174,20 +174,11 @@ def main():
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) # 動きをなかったことにする
+    
+        kk_img = kk_imgs[tuple(sum_mv)]
         screen.blit(kk_img, kk_rct)
         
-        # 爆弾の画面外判定
-        yoko, tate = check_bound(bb_rct)
-        if not yoko: # 横方向にはみ出たら
-            vx *= -1 
-        if not tate: # 縦方向にはみ出たら
-            vy *= -1
-        
-        kk_img = kk_imgs[tuple(sum_mv)]
-        screen.blit(bb_img, bb_rct)
-        
         vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy))
-        
         # 演習2
         avx = vx * bb_accs[min(tmr // 500, 9)] # 現在の加速度を反映した速度
         avy = vy * bb_accs[min(tmr // 500, 9)]
@@ -199,6 +190,15 @@ def main():
         bb_rct.height = bb_img.get_rect().height
         
         bb_rct.move_ip(avx, avy) # vx, vy の代わりに avx, avy を使う
+        
+        # 爆弾の画面外判定
+        yoko, tate = check_bound(bb_rct)
+        if not yoko: # 横方向にはみ出たら
+            vx *= -1 
+        if not tate: # 縦方向にはみ出たら
+            vy *= -1
+        
+        screen.blit(bb_img, bb_rct)
         
         pg.display.update()
         tmr += 1
