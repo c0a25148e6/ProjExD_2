@@ -3,6 +3,7 @@ import sys
 import pygame as pg
 import random
 import time
+import math
 
 
 WIDTH, HEIGHT = 1100, 650
@@ -95,6 +96,27 @@ def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
     return kk_dict
 
 
+def calc_orientation(org: pg.Rect, dst: pg.Rect, current_xy: tuple[float, float]) -> tuple[float, float]:
+    """
+    爆弾がこうかとんに向かって移動するベクトルを計算する
+    """
+    dx = dst.centerx - org.centerx
+    dy = dst.centery - org.centery
+    norm = math.sqrt(dx**2 + dy**2)
+    
+    # 距離が300未満なら、慣性として計算前の方向ベクトルを返す
+    if norm < 300:
+        return current_xy
+        
+    # ノルムが√50になるように正規化する
+    target_norm = math.sqrt(50)
+    vx = (dx / norm) * target_norm
+    vy = (dy / norm) * target_norm
+    
+    return vx, vy
+
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -138,9 +160,8 @@ def main():
             if key_lst[key]:
                 sum_mv[0] += mv[0] # 横方向の移動量
                 sum_mv[1] += mv[1] # 縦方向の移動量
-        kk_img = kk_imgs[tuple(sum_mv)] # 移動量のタプルをキーにして画像を取得
-        screen.blit(kk_img, kk_rct)
-                
+            
+    
         # if key_lst[pg.K_UP]:
         #     sum_mv[1] -= 5
         # if key_lst[pg.K_DOWN]:
@@ -155,18 +176,17 @@ def main():
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) # 動きをなかったことにする
         screen.blit(kk_img, kk_rct)
         
-        bb_rct.move_ip(vx, vy) # メソッドで速度に応じて位置を移動
-        
         # 爆弾の画面外判定
         yoko, tate = check_bound(bb_rct)
         if not yoko: # 横方向にはみ出たら
             vx *= -1 
         if not tate: # 縦方向にはみ出たら
             vy *= -1
+        
+        kk_img = kk_imgs[tuple(sum_mv)]
         screen.blit(bb_img, bb_rct)
-        pg.display.update()
-        tmr += 1
-        clock.tick(50)
+        
+        vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy))
         
         # 演習2
         avx = vx * bb_accs[min(tmr // 500, 9)] # 現在の加速度を反映した速度
@@ -179,6 +199,10 @@ def main():
         bb_rct.height = bb_img.get_rect().height
         
         bb_rct.move_ip(avx, avy) # vx, vy の代わりに avx, avy を使う
+        
+        pg.display.update()
+        tmr += 1
+        clock.tick(50)
 
 
 if __name__ == "__main__":
