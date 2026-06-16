@@ -1,6 +1,7 @@
 import os
 import sys
 import pygame as pg
+import random
 
 
 WIDTH, HEIGHT = 1100, 650
@@ -19,6 +20,16 @@ def main():
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
+    
+    #爆弾の初期化
+    bb_img = pg.Surface((20,20)) # 一辺が20の正方形のSurface
+    pg.draw.circle(bb_img,(255,0,0),(10,10),10) # 中心に半径10の赤い円を描画
+    bb_img.set_colorkey((0,0,0)) # 四隅の黒を透過させる
+    bb_rct = bb_img.get_rect() # 画像Surfaceに対応する画像Rectを取得
+    bb_rct.centerx = random.randint(0,WIDTH) # 位置を表す変数に乱数を設定
+    bb_rct.centery = random.randint(0,HEIGHT)
+    vx, vy = +5, +5 # 横方向速度
+    
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -31,8 +42,8 @@ def main():
         sum_mv = [0, 0]
         for key,mv in DELTA.items():
             if key_lst[key]:
-                sum_mv[0] += mv[0]  # 横方向の移動量
-                sum_mv[1] += mv[1]  # 縦方向の移動量
+                sum_mv[0] += mv[0] # 横方向の移動量
+                sum_mv[1] += mv[1] # 縦方向の移動量
                 
         # if key_lst[pg.K_UP]:
         #     sum_mv[1] -= 5
@@ -45,6 +56,9 @@ def main():
         
         kk_rct.move_ip(sum_mv)
         screen.blit(kk_img, kk_rct)
+        
+        bb_rct.move_ip(vx, vy) # メソッドで速度に応じて位置を移動
+        screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
         clock.tick(50)
